@@ -8,6 +8,7 @@ import Client from "./pages/Client";
 import PolicyHolder from "./pages/PolicyHolder";
 import AddUser from "./pages/AddUser";
 import Collection from "./pages/Collection";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -68,6 +69,14 @@ function App() {
             element={
               <ProtectedRoute roles={["admin", "collection_supervisor"]}>
                 <Collection />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <ProtectedRoute roles={["admin"]}>
+                <Settings />
               </ProtectedRoute>
             }
           />

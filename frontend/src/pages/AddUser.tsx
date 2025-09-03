@@ -27,14 +27,16 @@ import {
   DialogActions,
   Chip,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  Search,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
-import { userService, type CreateUserRequest } from "../services/userService";
+import { userService, CreateUserRequest } from "../services/userService";
 
 interface User {
   id: number;
@@ -66,50 +68,45 @@ const AddUser = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    const filtered = users.filter(
+      (u) =>
+        u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        u.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
+
   const fetchUsers = async () => {
     try {
       setLoadingUsers(true);
-      // Mock data for now - replace with actual API call
-      const mockUsers: User[] = [
-        {
-          id: 1,
-          firstName: "John",
-          lastName: "Doe",
-          email: "john.doe@agency1.com",
-          phoneNumber: "+1234567890",
-          landlineNumber: "+1987654321",
-          officeHours: "9 AM - 5 PM",
-          role: "agent",
-          createdAt: "2024-01-15",
-        },
-        {
-          id: 2,
-          firstName: "Jane",
-          lastName: "Smith",
-          email: "jane.smith@agency1.com",
-          phoneNumber: "+1234567891",
-          role: "collection_supervisor",
-          createdAt: "2024-01-10",
-        },
-        {
-          id: 3,
-          firstName: "Mike",
-          lastName: "Johnson",
-          email: "mike.johnson@agency1.com",
-          phoneNumber: "+1234567892",
-          officeHours: "8 AM - 4 PM",
-          role: "agent",
-          createdAt: "2024-01-20",
-        },
-      ];
-      setUsers(mockUsers);
-    } catch (err) {
+
+      const storedUser = localStorage.getItem("user");
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+      if (!parsedUser || !parsedUser.agency?.id) {
+        throw new Error("No agency information found for the current user.");
+      }
+
+      const agencyId = parsedUser.agency.id;
+
+      const response = await userService.getUsers(agencyId);
+
+      setUsers(response);
+      setFilteredUsers(response); // initialize with full list
+    } catch (err: any) {
       console.error("Failed to fetch users:", err);
+      setUsers([]);
+      setFilteredUsers([]);
     } finally {
       setLoadingUsers(false);
     }
@@ -196,7 +193,22 @@ const AddUser = () => {
         </Button>
       </Box>
 
-      <Paper sx={{ width: "100%", overflow: "hidden" }}>
+      <Paper sx={{ p: 3 }}>
+        <Box sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
@@ -224,7 +236,7 @@ const AddUser = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                users.map((userRow) => (
+                filteredUsers.map((userRow) => (
                   <TableRow key={userRow.id} hover>
                     <TableCell>
                       {userRow.firstName} {userRow.lastName}

@@ -25,6 +25,8 @@ import {
   Policy as PolicyIcon,
   PersonAdd as PersonAddIcon,
   Collections as CollectionsIcon,
+  SettingsInputComponent,
+  Settings,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import { useRoleAccess } from "../hooks/useRoleAccess";
@@ -83,6 +85,12 @@ const Dashboard = () => {
       path: "/dashboard/collection",
       show: canAccessCollections(),
     },
+    {
+      text: "Settings",
+      icon: <Settings />,
+      path: "/dashboard/settings",
+      show: user?.role === "admin",
+    },
   ];
 
   const visibleMenuItems = menuItems.filter((item) => item.show);
@@ -136,6 +144,7 @@ const Dashboard = () => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          background: "white",
         }}
       >
         <Toolbar>
@@ -148,8 +157,14 @@ const Dashboard = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Role Dashboard
+          <Typography
+            color="textSecondary"
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1 }}
+          >
+            Welcome! {user?.firstName} {user?.lastName}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box
@@ -159,18 +174,19 @@ const Dashboard = () => {
                 alignItems: "flex-end",
               }}
             >
-              <Typography variant="body2">
-                {user?.firstName} {user?.lastName}
-              </Typography>
+              <Typography variant="body2"></Typography>
               <Chip
                 label={user?.role?.replace("_", " ").toUpperCase()}
                 size="small"
                 color={getRoleColor(user?.role || "")}
                 variant="outlined"
-                sx={{ color: "white", borderColor: "rgba(255,255,255,0.5)" }}
+                sx={{
+                  color: "textSecondary",
+                  borderColor: "rgba(255, 0, 0, 0.5)",
+                }}
               />
             </Box>
-            <Button color="inherit" onClick={handleLogout}>
+            <Button color="warning" onClick={handleLogout}>
               Logout
             </Button>
           </Box>
