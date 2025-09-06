@@ -7,91 +7,86 @@ import {
   Card,
   CardContent,
   Box,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  LinearProgress,
   Alert,
+  LinearProgress,
+  Button,
+  Collapse,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
-import { People, Policy, Collections, AttachMoney } from "@mui/icons-material";
+import {
+  People,
+  SupervisorAccount,
+  Person,
+  LibraryAdd,
+} from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import { useRoleAccess } from "../hooks/useRoleAccess";
 import {
   dashboardService,
-  type DashboardStats,
+  SupervisorBox,
+  UserStats,
 } from "../services/dashboardService";
 
 const Overview = () => {
   const { user } = useAuth();
-  const { isAdmin, isAgent, isCollectionSupervisor } = useRoleAccess();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const { isAdmin, isCollectionSupervisor } = useRoleAccess();
+
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [supervisors, setSupervisors] = useState<SupervisorBox[]>([]);
+  const [expanded, setExpanded] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Fetch user stats (only for admins)
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    if (!isAdmin()) return;
+
+    const fetchStats = async () => {
       try {
         setLoading(true);
-        const data = await dashboardService.getDashboardStats();
+        const data = await dashboardService.getUserStats(user?.agency?.id);
         setStats(data);
       } catch (err: any) {
-        console.error("Failed to fetch dashboard data:", err);
-        setError("Failed to load dashboard data");
-        // Fallback to mock data for demo purposes
-        setStats({
-          totalClients: isAgent() ? 24 : isAdmin() ? 156 : 89,
-          activePolicies: isAgent() ? 45 : isAdmin() ? 342 : 178,
-          pendingCollections: isCollectionSupervisor() ? 23 : isAdmin() ? 8 : 0,
-          monthlyRevenue: isAgent() ? 8450 : isAdmin() ? 45600 : 23400,
-          recentActivities: [
-            {
-              id: 1,
-              type: "Client",
-              description: "New client registration completed",
-              timestamp: "2 hours ago",
-              status: "success",
-            },
-            {
-              id: 2,
-              type: "Policy",
-              description: "Policy renewal pending approval",
-              timestamp: "4 hours ago",
-              status: "warning",
-            },
-            {
-              id: 3,
-              type: "Collection",
-              description: "Payment overdue - follow up required",
-              timestamp: "1 day ago",
-              status: "error",
-            },
-          ],
-        });
+        console.error("Failed to fetch user stats:", err);
+        setError("Failed to load user stats");
       } finally {
         setLoading(false);
       }
     };
+    fetchStats();
+  }, [user]);
 
-    fetchDashboardData();
-  }, [user?.role]);
+  // Fetch supervisors (admins see all, supervisors see only themselves)
+  useEffect(() => {
+    if (!isAdmin() && !isCollectionSupervisor()) return;
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "success":
-        return "success";
-      case "warning":
-        return "warning";
-      case "error":
-        return "error";
-      default:
-        return "default";
-    }
-  };
+    const fetchSupervisors = async () => {
+      try {
+        const data = await dashboardService.getSupervisorsWithAgents(
+          user?.agency?.id
+        );
+        console.log("Fetched supervisors:", data);
+        // Map firstName + lastName to name, and count agents
+        const mapped = data.map((s) => ({
+          ...s,
+          name: `${s.name}`,
+          agentCount: s.agents.length,
+        }));
+
+        if (isCollectionSupervisor()) {
+          // Show only the logged-in supervisor
+          setSupervisors(mapped.filter((s) => s.id === user?.id));
+        } else {
+          setSupervisors(mapped);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSupervisors();
+  }, [user]);
 
   const StatCard = ({ title, value, icon, color = "primary" }: any) => (
     <Card sx={{ height: "100%" }}>
@@ -107,11 +102,7 @@ const Overview = () => {
             <Typography color="textSecondary" gutterBottom variant="body2">
               {title}
             </Typography>
-            <Typography variant="h4" component="div">
-              {typeof value === "number" && title.includes("Revenue")
-                ? `$${value.toLocaleString()}`
-                : value}
-            </Typography>
+            <Typography variant="h4">{value}</Typography>
           </Box>
           <Box sx={{ color: `${color}.main` }}>{icon}</Box>
         </Box>
@@ -119,139 +110,115 @@ const Overview = () => {
     </Card>
   );
 
-  if (loading) {
+  const SupervisorCard = ({ supervisor }: { supervisor: SupervisorBox }) => {
+    const isExpanded = expanded === supervisor.id;
     return (
-      <Box>
-        <Typography variant="h4" gutterBottom>
-          Overview
-        </Typography>
-        <LinearProgress />
-      </Box>
+      <Card>
+        <CardContent>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "start",
+              justifyContent: "space-between",
+            }}
+          >
+            <Box>
+              <Typography variant="h6">{supervisor.name}</Typography>
+              <Typography color="textSecondary">Agents</Typography>
+              <Typography variant="h4">{supervisor.agentCount}</Typography>
+            </Box>
+            {supervisor.agentCount > 0 && (
+              <Button
+                onClick={() => setExpanded(isExpanded ? null : supervisor.id)}
+              >
+                {isExpanded ? "Hide Agents" : "Show Agents"}
+              </Button>
+            )}
+          </Box>
+          {supervisor.agentCount > 0 && (
+            <Collapse in={isExpanded}>
+              <List dense>
+                {supervisor.agents.map((a) => (
+                  <ListItem key={a.id}>
+                    <ListItemText>
+                      <Typography color="h6">{`${a.name}`}</Typography>
+                    </ListItemText>
+                  </ListItem>
+                ))}
+              </List>
+            </Collapse>
+          )}
+        </CardContent>
+      </Card>
     );
-  }
+  };
 
-  if (!stats) {
+  if (loading) return <LinearProgress />;
+
+  if (error)
     return (
       <Box>
-        <Typography variant="h4" gutterBottom>
-          Overview
-        </Typography>
-        <Alert severity="error">Failed to load dashboard data</Alert>
+        <Alert severity="error">{error}</Alert>
       </Box>
     );
-  }
 
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Overview
+        User Overview
       </Typography>
       <Typography variant="body1" color="textSecondary" gutterBottom>
-        Welcome back, {user?.firstName}! Here's your{" "}
-        {user?.role?.replace("_", " ")} dashboard overview.
+        Welcome back, {user?.firstName}! Here's your user overview for your
+        agency.
       </Typography>
 
-      {error && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          {error} - Showing demo data
-        </Alert>
-      )}
-
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Clients"
-            value={stats.totalClients}
-            icon={<People fontSize="large" />}
-            color="primary"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Active Policies"
-            value={stats.activePolicies}
-            icon={<Policy fontSize="large" />}
-            color="success"
-          />
-        </Grid>
-        {(isAdmin() || isCollectionSupervisor()) && (
+      {isAdmin() && stats && (
+        <Grid container spacing={3} sx={{ mt: 2 }}>
           <Grid item xs={12} sm={6} md={3}>
             <StatCard
-              title="Pending Collections"
-              value={stats.pendingCollections}
-              icon={<Collections fontSize="large" />}
+              title="Total Users"
+              value={stats.totalUsers}
+              icon={<People fontSize="large" />}
+              color="primary"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Collection Supervisors"
+              value={stats.collectionSupervisors}
+              icon={<SupervisorAccount fontSize="large" />}
               color="warning"
             />
           </Grid>
-        )}
-        <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Monthly Revenue"
-            value={stats.monthlyRevenue}
-            icon={<AttachMoney fontSize="large" />}
-            color="success"
-          />
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Agents"
+              value={stats.agents}
+              icon={<Person fontSize="large" />}
+              color="success"
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <StatCard
+              title="Admins"
+              value={stats.admins}
+              icon={<People fontSize="large" />}
+              color="error"
+            />
+          </Grid>
         </Grid>
-      </Grid>
+      )}
 
-      <Grid container spacing={3} sx={{ mt: 3 }}>
-        <Grid item xs={12} lg={8}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Recent Activities
-            </Typography>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell>Time</TableCell>
-                    <TableCell>Status</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {stats.recentActivities.map((activity) => (
-                    <TableRow key={activity.id}>
-                      <TableCell>{activity.type}</TableCell>
-                      <TableCell>{activity.description}</TableCell>
-                      <TableCell>{activity.timestamp}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={activity.status}
-                          color={getStatusColor(activity.status)}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
+      <Box sx={{ mt: 4 }}>
+        <Grid container spacing={3}>
+          {supervisors.map((s) => (
+            <Grid item xs={12} sm={6} md={4} key={s.id}>
+              <SupervisorCard supervisor={s} />
+            </Grid>
+          ))}
         </Grid>
-        <Grid item xs={12} lg={4}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Quick Actions
-            </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {isAdmin() && (
-                <Card variant="outlined" sx={{ p: 2, cursor: "pointer" }}>
-                  <Typography variant="body2">Add New User</Typography>
-                </Card>
-              )}
-              <Card variant="outlined" sx={{ p: 2, cursor: "pointer" }}>
-                <Typography variant="body2">View Reports</Typography>
-              </Card>
-              <Card variant="outlined" sx={{ p: 2, cursor: "pointer" }}>
-                <Typography variant="body2">Export Data</Typography>
-              </Card>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+      </Box>
     </Box>
   );
 };
