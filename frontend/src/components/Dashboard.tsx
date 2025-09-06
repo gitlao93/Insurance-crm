@@ -73,9 +73,9 @@ const Dashboard = () => {
       show: canAccessPolicyHolders(),
     },
     {
-      text: "Add User",
+      text: "User",
       icon: <PersonAddIcon />,
-      path: "/dashboard/add-user",
+      path: "/dashboard/user",
       show: canAddUsers(),
     },
     {

@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 import Overview from "./pages/Overview";
 import Client from "./pages/Client";
 import PolicyHolder from "./pages/PolicyHolder";
-import AddUser from "./pages/AddUser";
+import User from "./pages/User";
 import Collection from "./pages/Collection";
 import Agency from "./pages/Agency";
 
@@ -57,10 +57,10 @@ function App() {
             }
           />
           <Route
-            path="add-user"
+            path="user"
             element={
               <ProtectedRoute roles={["admin"]}>
-                <AddUser />
+                <User />
               </ProtectedRoute>
             }
           />

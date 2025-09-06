@@ -36,7 +36,7 @@ let UsersService = class UsersService {
         return await this.userRepository.save(user);
     }
     async findAll(agencyId) {
-        const whereCondition = { isActive: true };
+        const whereCondition = {};
         if (agencyId) {
             whereCondition.agencyId = agencyId;
         }
@@ -47,7 +47,7 @@ let UsersService = class UsersService {
     }
     async findOne(id) {
         return await this.userRepository.findOne({
-            where: { id, isActive: true },
+            where: { id },
             relations: ["agency"],
         });
     }
@@ -77,6 +77,22 @@ let UsersService = class UsersService {
             updateUserDto.password = await bcrypt.hash(updateUserDto.password, saltRounds);
         }
         Object.assign(user, updateUserDto);
+        return await this.userRepository.save(user);
+    }
+    async deactivate(id) {
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
+        user.isActive = false;
+        return await this.userRepository.save(user);
+    }
+    async activate(id) {
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
+        user.isActive = true;
         return await this.userRepository.save(user);
     }
     async remove(id) {

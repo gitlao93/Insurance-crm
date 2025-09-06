@@ -41,7 +41,7 @@ export class UsersService {
   }
 
   async findAll(agencyId?: number): Promise<User[]> {
-    const whereCondition: any = { isActive: true };
+    const whereCondition: any = {};
     if (agencyId) {
       whereCondition.agencyId = agencyId;
     }
@@ -54,7 +54,7 @@ export class UsersService {
 
   async findOne(id: number): Promise<User> {
     return await this.userRepository.findOne({
-      where: { id, isActive: true },
+      where: { id },
       relations: ["agency"],
     });
   }
@@ -97,6 +97,24 @@ export class UsersService {
     Object.assign(user, updateUserDto);
 
     // Save updated entity (this runs validations, subscribers, hooks, etc.)
+    return await this.userRepository.save(user);
+  }
+
+  async deactivate(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    user.isActive = false;
+    return await this.userRepository.save(user);
+  }
+
+  async activate(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    user.isActive = true;
     return await this.userRepository.save(user);
   }
 
