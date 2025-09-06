@@ -33,6 +33,20 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
+], CreateAgencyDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateAgencyDto.prototype, "phoneNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateAgencyDto.prototype, "landLine", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
 ], CreateAgencyDto.prototype, "postalCode", void 0);
 __decorate([
     (0, class_validator_1.IsBoolean)(),

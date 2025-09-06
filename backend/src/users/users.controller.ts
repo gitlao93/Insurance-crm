@@ -6,6 +6,7 @@ import {
   Delete,
   UseGuards,
   Body,
+  Param,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -34,7 +35,7 @@ export class UsersController {
 
   @Get(":id")
   @Roles("admin", "agent", "collection_supervisor")
-  async findOne(id: string) {
+  async findOne(@Param("id") id: string) {
     const userId = +id;
     // Note: In a real implementation, you would check user permissions here
     return this.usersService.findOne(userId);
@@ -42,15 +43,14 @@ export class UsersController {
 
   @Patch(":id")
   @Roles("admin")
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
     const userId = +id;
-    // Note: In a real implementation, you would check user permissions here
     return this.usersService.update(userId, updateUserDto);
   }
 
   @Delete(":id")
   @Roles("admin")
-  async remove(id: string) {
+  async remove(@Param("id") id: string) {
     const userId = +id;
     // Note: In a real implementation, you would check user permissions here
     return this.usersService.remove(userId);

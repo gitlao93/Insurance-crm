@@ -20,21 +20,33 @@ __decorate([
     __metadata("design:type", Number)
 ], Agency.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 255 }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], Agency.prototype, "agencyName", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 255 }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], Agency.prototype, "street", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 255 }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], Agency.prototype, "cityMunicipality", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "varchar", length: 20 }),
+    (0, typeorm_1.Column)({ type: "varchar" }),
     __metadata("design:type", String)
 ], Agency.prototype, "postalCode", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar" }),
+    __metadata("design:type", String)
+], Agency.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
+    __metadata("design:type", String)
+], Agency.prototype, "phoneNumber", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "varchar", nullable: true }),
+    __metadata("design:type", String)
+], Agency.prototype, "landLine", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "boolean", default: true }),
     __metadata("design:type", Boolean)

@@ -68,12 +68,16 @@ let UsersService = class UsersService {
         });
     }
     async update(id, updateUserDto) {
+        const user = await this.userRepository.findOne({ where: { id } });
+        if (!user) {
+            throw new common_1.NotFoundException(`User with ID ${id} not found`);
+        }
         if (updateUserDto.password) {
             const saltRounds = 10;
             updateUserDto.password = await bcrypt.hash(updateUserDto.password, saltRounds);
         }
-        await this.userRepository.update(id, updateUserDto);
-        return this.findOne(id);
+        Object.assign(user, updateUserDto);
+        return await this.userRepository.save(user);
     }
     async remove(id) {
         await this.userRepository.update(id, { isActive: false });

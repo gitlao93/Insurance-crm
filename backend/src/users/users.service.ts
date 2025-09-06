@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from "@nestjs/common";
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from "@nestjs/common";
 import { Repository } from "typeorm";
 import { User, UserRole } from "./entities/user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -75,6 +79,12 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Handle password hashing only if a new password is provided
     if (updateUserDto.password) {
       const saltRounds = 10;
       updateUserDto.password = await bcrypt.hash(
@@ -83,8 +93,11 @@ export class UsersService {
       );
     }
 
-    await this.userRepository.update(id, updateUserDto);
-    return this.findOne(id);
+    // Merge changes into the entity
+    Object.assign(user, updateUserDto);
+
+    // Save updated entity (this runs validations, subscribers, hooks, etc.)
+    return await this.userRepository.save(user);
   }
 
   async remove(id: number): Promise<void> {

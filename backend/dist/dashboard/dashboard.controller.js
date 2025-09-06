@@ -35,6 +35,9 @@ let DashboardController = class DashboardController {
             officeHours: "",
             isActive: false,
             agency: new agency_entity_1.Agency(),
+            supervisorId: null,
+            supervisor: null,
+            subordinates: [],
         });
     }
     async getClients() {
@@ -51,6 +54,9 @@ let DashboardController = class DashboardController {
             officeHours: "",
             isActive: false,
             agency: new agency_entity_1.Agency(),
+            supervisorId: null,
+            supervisor: null,
+            subordinates: [],
         });
     }
     async getPolicyHolders() {
@@ -67,6 +73,9 @@ let DashboardController = class DashboardController {
             officeHours: "",
             isActive: false,
             agency: new agency_entity_1.Agency(),
+            supervisorId: null,
+            supervisor: null,
+            subordinates: [],
         });
     }
     async getCollections() {
@@ -83,6 +92,9 @@ let DashboardController = class DashboardController {
             officeHours: "",
             isActive: false,
             agency: new agency_entity_1.Agency(),
+            supervisorId: null,
+            supervisor: null,
+            subordinates: [],
         });
     }
 };

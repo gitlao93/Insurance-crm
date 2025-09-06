@@ -9,4 +9,5 @@ export declare class CreateUserDto {
     officeHours?: string;
     role?: UserRole;
     agencyId: number;
+    supervisorId?: number;
 }

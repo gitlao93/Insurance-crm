@@ -28,6 +28,9 @@ export class DashboardController {
       officeHours: "",
       isActive: false,
       agency: new Agency(),
+      supervisorId: null, // raw FK column (nullable)
+      supervisor: null, // relation object (null if no supervisor)
+      subordinates: [],
     });
   }
 
@@ -48,6 +51,9 @@ export class DashboardController {
       officeHours: "",
       isActive: false,
       agency: new Agency(),
+      supervisorId: null, // raw FK column (nullable)
+      supervisor: null, // relation object (null if no supervisor)
+      subordinates: [],
     });
   }
 
@@ -68,6 +74,9 @@ export class DashboardController {
       officeHours: "",
       isActive: false,
       agency: new Agency(),
+      supervisorId: null, // raw FK column (nullable)
+      supervisor: null, // relation object (null if no supervisor)
+      subordinates: [],
     });
   }
 
@@ -88,6 +97,9 @@ export class DashboardController {
       officeHours: "",
       isActive: false,
       agency: new Agency(),
+      supervisorId: null, // raw FK column (nullable)
+      supervisor: null, // relation object (null if no supervisor)
+      subordinates: [],
     });
   }
 }

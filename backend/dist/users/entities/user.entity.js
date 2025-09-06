@@ -17,6 +17,7 @@ var UserRole;
     UserRole["ADMIN"] = "admin";
     UserRole["AGENT"] = "agent";
     UserRole["COLLECTION_SUPERVISOR"] = "collection_supervisor";
+    UserRole["SUPER_ADMIN"] = "super_admin";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let User = class User {
 };
@@ -74,6 +75,19 @@ __decorate([
     (0, typeorm_1.Column)({ name: "agency_id" }),
     __metadata("design:type", Number)
 ], User.prototype, "agencyId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => User, (user) => user.subordinates, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: "supervisor_id" }),
+    __metadata("design:type", User)
+], User.prototype, "supervisor", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: "supervisor_id", nullable: true }),
+    __metadata("design:type", Number)
+], User.prototype, "supervisorId", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => User, (user) => user.supervisor),
+    __metadata("design:type", Array)
+], User.prototype, "subordinates", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)("users")
 ], User);

@@ -5,6 +5,9 @@ export declare class Agency {
     street: string;
     cityMunicipality: string;
     postalCode: string;
+    email: string;
+    phoneNumber: string;
+    landLine: string;
     isActive: boolean;
     users: User[];
 }

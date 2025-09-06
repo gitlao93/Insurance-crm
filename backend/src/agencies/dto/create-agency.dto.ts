@@ -1,23 +1,34 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean } from "class-validator"
+import { IsString, IsNotEmpty, IsOptional, IsBoolean } from "class-validator";
 
 export class CreateAgencyDto {
   @IsString()
   @IsNotEmpty()
-  agencyName: string
+  agencyName: string;
 
   @IsString()
   @IsNotEmpty()
-  street: string
+  street: string;
 
   @IsString()
   @IsNotEmpty()
-  cityMunicipality: string
+  cityMunicipality: string;
 
   @IsString()
   @IsNotEmpty()
-  postalCode: string
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
+
+  @IsString()
+  landLine: string;
+
+  @IsString()
+  @IsNotEmpty()
+  postalCode: string;
 
   @IsBoolean()
   @IsOptional()
-  isActive?: boolean
+  isActive?: boolean;
 }

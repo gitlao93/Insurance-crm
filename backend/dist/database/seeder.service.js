@@ -39,17 +39,23 @@ let SeederService = class SeederService {
     async createAgencies() {
         const agencyData = [
             {
-                agencyName: "GoodLife Damayan",
+                agencyName: "GoodLife Damayan CDO",
                 street: "J. Seriña St",
                 cityMunicipality: "Cagayan de Oro City",
                 postalCode: "9000",
+                email: "cdo.branch@goodlife.com",
+                phoneNumber: "09674589666",
+                landLine: "(02) 1100-0000",
                 isActive: true,
             },
             {
-                agencyName: "GoodLife Damayan",
+                agencyName: "GoodLife Damayan Davao",
                 street: "Brgy. 24-C Boulevard",
                 cityMunicipality: "Davao City",
                 postalCode: "8003",
+                email: "davao.branch@goodlife.com",
+                phoneNumber: "09674589633",
+                landLine: "(02) 2200-0000",
                 isActive: true,
             },
         ];
@@ -58,58 +64,58 @@ let SeederService = class SeederService {
     }
     async createUsers(agencies) {
         const hashedPassword = await bcrypt.hash("password123", 10);
-        const userData = [
-            {
-                firstName: "John",
-                lastName: "Admin",
-                email: "john.admin@goodlifecdo.com",
+        const users = [];
+        for (const agency of agencies) {
+            const admin = this.userRepository.create({
+                firstName: `Admin`,
+                lastName: agency.cityMunicipality,
+                email: `admin.${agency.cityMunicipality.toLowerCase().replace(/\s/g, "")}@goodlife.com`,
                 password: hashedPassword,
-                phoneNumber: "+63-917-123-4567",
-                landlineNumber: "(02) 8123-4567",
+                phoneNumber: "+63-917-000-0000",
+                landlineNumber: "(02) 8000-0000",
                 officeHours: "8:00 AM - 5:00 PM",
                 role: user_entity_1.UserRole.ADMIN,
                 isActive: true,
-                agencyId: agencies[0].id,
-            },
-            {
-                firstName: "Maria",
-                lastName: "Agenteuno",
-                email: "maria.agent1@goodlifecdo.com",
-                password: hashedPassword,
-                phoneNumber: "+63-917-234-5678",
-                landlineNumber: "(02) 8234-5678",
-                officeHours: "9:00 AM - 6:00 PM",
-                role: user_entity_1.UserRole.AGENT,
-                isActive: true,
-                agencyId: agencies[0].id,
-            },
-            {
-                firstName: "Carlos",
-                lastName: "DosAgente",
-                email: "carlos.agent2@goodlifecdo.com",
-                password: hashedPassword,
-                phoneNumber: "+63-917-345-6789",
-                landlineNumber: null,
-                officeHours: "8:30 AM - 5:30 PM",
-                role: user_entity_1.UserRole.AGENT,
-                isActive: true,
-                agencyId: agencies[0].id,
-            },
-            {
-                firstName: "Ana",
-                lastName: "Collens",
-                email: "ana.collection@goodlifecdo.com",
-                password: hashedPassword,
-                phoneNumber: "+63-917-456-7890",
-                landlineNumber: "(02) 8456-7890",
-                officeHours: "8:00 AM - 5:00 PM",
-                role: user_entity_1.UserRole.COLLECTION_SUPERVISOR,
-                isActive: true,
-                agencyId: agencies[0].id,
-            },
-        ];
-        const users = this.userRepository.create(userData);
-        return await this.userRepository.save(users);
+                agencyId: agency.id,
+            });
+            await this.userRepository.save(admin);
+            users.push(admin);
+            for (let s = 1; s <= 2; s++) {
+                const supervisor = this.userRepository.create({
+                    firstName: `Supervisor${s}`,
+                    lastName: agency.cityMunicipality,
+                    email: `supervisor${s}.${agency.cityMunicipality.toLowerCase().replace(/\s/g, "")}@goodlife.com`,
+                    password: hashedPassword,
+                    phoneNumber: `+63-917-100-000${s}`,
+                    landlineNumber: null,
+                    officeHours: "8:00 AM - 5:00 PM",
+                    role: user_entity_1.UserRole.COLLECTION_SUPERVISOR,
+                    isActive: true,
+                    agencyId: agency.id,
+                    supervisorId: admin.id,
+                });
+                await this.userRepository.save(supervisor);
+                users.push(supervisor);
+                for (let a = 1; a <= 2; a++) {
+                    const agent = this.userRepository.create({
+                        firstName: `Agent${s}${a}`,
+                        lastName: agency.cityMunicipality,
+                        email: `agent${s}${a}.${agency.cityMunicipality.toLowerCase().replace(/\s/g, "")}@goodlife.com`,
+                        password: hashedPassword,
+                        phoneNumber: `+63-917-200-000${s}${a}`,
+                        landlineNumber: null,
+                        officeHours: "9:00 AM - 6:00 PM",
+                        role: user_entity_1.UserRole.AGENT,
+                        isActive: true,
+                        agencyId: agency.id,
+                        supervisorId: supervisor.id,
+                    });
+                    await this.userRepository.save(agent);
+                    users.push(agent);
+                }
+            }
+        }
+        return users;
     }
 };
 exports.SeederService = SeederService;

@@ -25,7 +25,6 @@ import {
   Policy as PolicyIcon,
   PersonAdd as PersonAddIcon,
   Collections as CollectionsIcon,
-  SettingsInputComponent,
   Settings,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
@@ -86,9 +85,9 @@ const Dashboard = () => {
       show: canAccessCollections(),
     },
     {
-      text: "Settings",
+      text: "Agency",
       icon: <Settings />,
-      path: "/dashboard/settings",
+      path: "/dashboard/agency",
       show: user?.role === "admin",
     },
   ];
