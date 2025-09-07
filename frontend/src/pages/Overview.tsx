@@ -62,7 +62,6 @@ const Overview = () => {
         const data = await dashboardService.getSupervisorsWithAgents(
           user?.agency?.id
         );
-        console.log("Fetched supervisors:", data);
         // Map firstName + lastName to name, and count agents
         const mapped = data.map((s) => ({
           ...s,

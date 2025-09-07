@@ -38,7 +38,6 @@ export default function SettingsPage() {
   };
   const fetchData = async () => {
     try {
-      console.log("loginUser", user?.id);
       const userId = user?.id ?? 0; // example: replace with auth context/localStorage
       const u = await userService.getUserById(userId);
       setUserData(u);
