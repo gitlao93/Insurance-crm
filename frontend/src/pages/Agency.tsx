@@ -10,8 +10,10 @@ import {
 } from "@mui/material";
 import { agencyService, Agency } from "../services/agencyService";
 import { userService, User } from "../services/userService";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
   const [agencyData, setAgencyData] = useState<Agency | null>(null);
   const [originalAgencyData, setOriginalAgencyData] = useState<Agency | null>(
     null
@@ -24,24 +26,6 @@ export default function SettingsPage() {
   const [savingUser, setSavingUser] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userId = 1; // example: replace with auth context/localStorage
-        const user = await userService.getUserById(userId);
-        setUserData(user);
-        setOriginalUserData(user);
-
-        if (user.agency?.id) {
-          const agency = await agencyService.getAgencyById(user.agency.id);
-          setAgencyData(agency);
-          setOriginalAgencyData(agency);
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
@@ -52,7 +36,25 @@ export default function SettingsPage() {
       [e.target.name]: e.target.value,
     });
   };
+  const fetchData = async () => {
+    try {
+      console.log("loginUser", user?.id);
+      const userId = user?.id ?? 0; // example: replace with auth context/localStorage
+      const u = await userService.getUserById(userId);
+      setUserData(u);
+      setOriginalUserData(u);
 
+      if (u.agency?.id) {
+        const agency = await agencyService.getAgencyById(u.agency.id);
+        setAgencyData(agency);
+        setOriginalAgencyData(agency);
+      }
+    } catch (err) {
+      console.error("Failed to fetch settings:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!userData) return;
     setUserData({
