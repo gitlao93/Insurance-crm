@@ -27,6 +27,8 @@ import {
   Chip,
   IconButton,
   InputAdornment,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { Add as AddIcon, Edit as EditIcon, Search } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
@@ -38,7 +40,6 @@ const UserManagement = () => {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-
   const [formData, setFormData] = useState<
     CreateUserRequest & { supervisorId?: number }
   >({
@@ -53,12 +54,12 @@ const UserManagement = () => {
     agencyId: user?.agency?.id || 0,
     supervisorId: undefined,
   });
-
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [tab, setTab] = useState("all"); // Tabs: all, supervisor, agent, inactive
 
   useEffect(() => {
     fetchUsers();
@@ -84,23 +85,14 @@ const UserManagement = () => {
   );
 
   const handleChange = (e: any) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
-
-      // Build safe payload
       const { id, isActive, agency, createdAt, ...cleanData } = formData;
-
-      // ⚡ If password is empty during update, remove it
-      if (editingUser && !cleanData.password) {
-        delete cleanData.password;
-      }
+      if (editingUser && !cleanData.password) delete cleanData.password;
 
       if (editingUser) {
         await userService.updateUser(editingUser.id, cleanData);
@@ -140,6 +132,22 @@ const UserManagement = () => {
     setOpenEdit(true);
   };
 
+  // Filter users by tab and search term
+  const filteredUsers = users
+    .filter((u) => {
+      if (tab === "all") return u.isActive;
+      if (tab === "supervisor")
+        return u.role === "collection_supervisor" && u.isActive;
+      if (tab === "agent") return u.role === "agent" && u.isActive;
+      if (tab === "inactive") return !u.isActive;
+      return true;
+    })
+    .filter((u) =>
+      `${u.firstName} ${u.lastName} ${u.email}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
@@ -152,6 +160,15 @@ const UserManagement = () => {
           Add User
         </Button>
       </Box>
+
+      <Paper sx={{ p: 3, mb: 2 }}>
+        <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
+          <Tab label="All" value="all" />
+          <Tab label="Supervisor" value="supervisor" />
+          <Tab label="Agent" value="agent" />
+          <Tab label="Inactive" value="inactive" />
+        </Tabs>
+      </Paper>
 
       <Paper sx={{ p: 3 }}>
         <TextField
@@ -189,68 +206,60 @@ const UserManagement = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                users
-                  .filter((u) =>
-                    `${u.firstName} ${u.lastName} ${u.email}`
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase())
-                  )
-                  .map((u) => (
-                    <TableRow key={u.id}>
-                      <TableCell>
-                        {u.firstName} {u.lastName}
-                      </TableCell>
-                      <TableCell>{u.email}</TableCell>
-                      <TableCell>{u.phoneNumber}</TableCell>
-                      <TableCell>
-                        <Chip
-                          label={
-                            u.role?.replace("_", " ").toUpperCase() || "N/A"
+                filteredUsers.map((u) => (
+                  <TableRow key={u.id}>
+                    <TableCell>
+                      {u.firstName} {u.lastName}
+                    </TableCell>
+                    <TableCell>{u.email}</TableCell>
+                    <TableCell>{u.phoneNumber}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={u.role?.replace("_", " ").toUpperCase() || "N/A"}
+                        color={getRoleColor(u.role)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={u.isActive ? "Active" : "Inactive"}
+                        color={u.isActive ? "success" : "default"}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <IconButton onClick={() => openEditDialog(u)}>
+                        <EditIcon />
+                      </IconButton>
+                      {u.isActive ? (
+                        <Button
+                          size="small"
+                          onClick={() =>
+                            userService.deactivateUser(u.id).then(fetchUsers)
                           }
-                          color={getRoleColor(u.role)}
+                        >
+                          Deactivate
+                        </Button>
+                      ) : (
+                        <Button
                           size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={u.isActive ? "Active" : "Inactive"}
-                          color={u.isActive ? "success" : "default"}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => openEditDialog(u)}>
-                          <EditIcon />
-                        </IconButton>
-                        {u.isActive ? (
-                          <Button
-                            size="small"
-                            onClick={() =>
-                              userService.deactivateUser(u.id).then(fetchUsers)
-                            }
-                          >
-                            Deactivate
-                          </Button>
-                        ) : (
-                          <Button
-                            size="small"
-                            onClick={() =>
-                              userService.activateUser(u.id).then(fetchUsers)
-                            }
-                          >
-                            Activate
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                          onClick={() =>
+                            userService.activateUser(u.id).then(fetchUsers)
+                          }
+                        >
+                          Activate
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
         </TableContainer>
       </Paper>
 
-      {/* Add/Edit Dialog */}
+      {/* Add/Edit Dialog (remains unchanged) */}
       <Dialog
         open={openAdd || openEdit}
         onClose={() => {
