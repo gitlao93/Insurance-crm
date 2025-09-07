@@ -40,9 +40,15 @@ const UserManagement = () => {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [formData, setFormData] = useState<
-    CreateUserRequest & { supervisorId?: number }
-  >({
+  type UserFormData = CreateUserRequest & {
+    supervisorId?: number;
+    id?: number;
+    isActive?: boolean;
+    agency?: { id: number; agencyName: string };
+    createdAt?: string;
+    password?: string;
+  };
+  const [formData, setFormData] = useState<UserFormData>({
     firstName: "",
     lastName: "",
     email: "",
@@ -52,7 +58,7 @@ const UserManagement = () => {
     officeHours: "",
     role: "agent",
     agencyId: user?.agency?.id || 0,
-    supervisorId: undefined,
+    supervisorId: 0,
   });
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -92,13 +98,22 @@ const UserManagement = () => {
     try {
       setLoading(true);
       const { id, isActive, agency, createdAt, ...cleanData } = formData;
-      if (editingUser && !cleanData.password) delete cleanData.password;
+
+      // Prepare the data to send
+      let dataToSend: CreateUserRequest = {
+        ...cleanData,
+      };
+
+      // Only include password if it's set (required for new user, optional for edit)
+      if (!editingUser || (editingUser && formData.password)) {
+        dataToSend.password = formData.password!;
+      }
 
       if (editingUser) {
-        await userService.updateUser(editingUser.id, cleanData);
+        await userService.updateUser(editingUser.id, dataToSend);
         setSuccess("User updated successfully");
       } else {
-        await userService.createUser(cleanData as CreateUserRequest);
+        await userService.createUser(dataToSend);
         setSuccess("User created successfully");
       }
 
@@ -128,7 +143,12 @@ const UserManagement = () => {
 
   const openEditDialog = (user: User) => {
     setEditingUser(user);
-    setFormData({ ...user, password: "", agencyId: user.agency?.id || 0 });
+    setFormData({
+      ...user,
+      password: "", // reset password field for edit
+      agencyId: user.agency?.id || 0,
+      role: user.role || "agent", // fallback if role is undefined
+    });
     setOpenEdit(true);
   };
 
