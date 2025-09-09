@@ -18,6 +18,11 @@ const dashboard_module_1 = require("./dashboard/dashboard.module");
 const user_entity_1 = require("./users/entities/user.entity");
 const agency_entity_1 = require("./agencies/entities/agency.entity");
 const seeder_module_1 = require("./database/seeder.module");
+const policy_category_entity_1 = require("./policies/entities/policy-category.entity");
+const policy_plan_entity_1 = require("./policies/entities/policy-plan.entity");
+const policy_module_1 = require("./policies/policy.module");
+const lead_module_1 = require("./lead/lead.module");
+const lead_entity_1 = require("./lead/entities/lead.entity");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -30,7 +35,7 @@ exports.AppModule = AppModule = __decorate([
                 port: 3306,
                 username: "root",
                 database: "goodlife_insurance_db",
-                entities: [user_entity_1.User, agency_entity_1.Agency],
+                entities: [user_entity_1.User, agency_entity_1.Agency, policy_category_entity_1.PolicyCategory, policy_plan_entity_1.PolicyPlan, lead_entity_1.Lead],
                 synchronize: true,
                 logging: true,
             }),
@@ -44,6 +49,8 @@ exports.AppModule = AppModule = __decorate([
             agencies_module_1.AgenciesModule,
             dashboard_module_1.DashboardModule,
             seeder_module_1.SeederModule,
+            policy_module_1.PoliciesModule,
+            lead_module_1.LeadModule,
         ],
     })
 ], AppModule);
