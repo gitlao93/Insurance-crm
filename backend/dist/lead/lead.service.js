@@ -27,7 +27,13 @@ let LeadService = class LeadService {
     }
     async findAll() {
         return this.leadRepository.find({
-            relations: ["agent", "policyPlan"],
+            relations: ["policyPlan", "policyPlan.category"],
+        });
+    }
+    async findByAgent(agentId) {
+        return this.leadRepository.find({
+            where: { agent: { id: agentId } },
+            relations: ["policyPlan", "policyPlan.category"],
         });
     }
     async findOne(id) {

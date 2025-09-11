@@ -7,6 +7,7 @@ export declare class LeadService {
     constructor(leadRepository: Repository<Lead>);
     create(dto: CreateLeadDto): Promise<Lead>;
     findAll(): Promise<Lead[]>;
+    findByAgent(agentId: number): Promise<Lead[]>;
     findOne(id: number): Promise<Lead>;
     update(id: number, dto: UpdateLeadDto): Promise<Lead>;
     remove(id: number): Promise<void>;

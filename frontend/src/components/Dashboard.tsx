@@ -61,9 +61,9 @@ const Dashboard = () => {
       show: true, // Everyone can access overview
     },
     {
-      text: "Client",
+      text: "Lead",
       icon: <PeopleIcon />,
-      path: "/dashboard/client",
+      path: "/dashboard/lead",
       show: canAccessClients(),
     },
     {

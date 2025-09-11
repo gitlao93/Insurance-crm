@@ -4,6 +4,7 @@ import { Repository } from "typeorm";
 import { Lead } from "./entities/lead.entity";
 import { CreateLeadDto } from "./dto/create-lead.dto";
 import { UpdateLeadDto } from "./dto/update-lead.dto";
+import { User } from "src/users/entities/user.entity";
 
 @Injectable()
 export class LeadService {
@@ -19,7 +20,14 @@ export class LeadService {
 
   async findAll(): Promise<Lead[]> {
     return this.leadRepository.find({
-      relations: ["agent", "policyPlan"],
+      relations: ["policyPlan", "policyPlan.category"],
+    });
+  }
+
+  async findByAgent(agentId: number): Promise<Lead[]> {
+    return this.leadRepository.find({
+      where: { agent: { id: agentId } },
+      relations: ["policyPlan", "policyPlan.category"],
     });
   }
 

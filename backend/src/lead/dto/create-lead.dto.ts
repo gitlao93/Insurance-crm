@@ -1,13 +1,5 @@
-import {
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-} from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { LeadStatus } from "../entities/lead.entity";
-import { Type } from "class-transformer";
 
 export class CreateLeadDto {
   @IsString()
@@ -18,24 +10,24 @@ export class CreateLeadDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsEmail()
-  @IsOptional()
-  email?: string;
+  @IsString()
+  @IsNotEmpty()
+  email: string;
 
   @IsString()
-  @IsOptional()
-  phoneNumber?: string;
+  @IsNotEmpty()
+  phoneNumber: string;
 
   @IsEnum(LeadStatus)
-  @IsOptional()
-  status?: LeadStatus = LeadStatus.NEW;
+  status: LeadStatus;
 
-  @Type(() => Number)
-  @IsNumber()
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @IsNotEmpty()
   agentId: number;
 
-  @Type(() => Number)
-  @IsNumber()
-  @IsOptional()
-  policyPlanId?: number;
+  @IsNotEmpty()
+  policyPlanId: number;
 }

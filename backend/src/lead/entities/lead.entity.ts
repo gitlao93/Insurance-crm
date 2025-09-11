@@ -37,6 +37,9 @@ export class Lead {
   @Column({ type: "enum", enum: LeadStatus, default: LeadStatus.NEW })
   status: LeadStatus;
 
+  @Column({ type: "text", nullable: true })
+  note?: string;
+
   @Column()
   agentId: number;
 

@@ -17,24 +17,30 @@ const common_1 = require("@nestjs/common");
 const lead_service_1 = require("./lead.service");
 const create_lead_dto_1 = require("./dto/create-lead.dto");
 const update_lead_dto_1 = require("./dto/update-lead.dto");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let LeadController = class LeadController {
     constructor(leadService) {
         this.leadService = leadService;
     }
-    create(dto) {
-        return this.leadService.create(dto);
+    create(createLeadDto) {
+        return this.leadService.create(createLeadDto);
     }
-    findAll() {
+    async findAll(req) {
+        const user = req.user;
+        console.log("user: ", user);
+        if (user.role === "agent") {
+            return this.leadService.findByAgent(user.id);
+        }
         return this.leadService.findAll();
     }
     findOne(id) {
-        return this.leadService.findOne(+id);
+        return this.leadService.findOne(id);
     }
-    update(id, dto) {
-        return this.leadService.update(+id, dto);
+    update(id, updateLeadDto) {
+        return this.leadService.update(id, updateLeadDto);
     }
     remove(id) {
-        return this.leadService.remove(+id);
+        return this.leadService.remove(id);
     }
 };
 exports.LeadController = LeadController;
@@ -47,15 +53,16 @@ __decorate([
 ], LeadController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
 ], LeadController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(":id"),
     __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], LeadController.prototype, "findOne", null);
 __decorate([
@@ -63,18 +70,19 @@ __decorate([
     __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_lead_dto_1.UpdateLeadDto]),
+    __metadata("design:paramtypes", [Number, update_lead_dto_1.UpdateLeadDto]),
     __metadata("design:returntype", void 0)
 ], LeadController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(":id"),
     __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
 ], LeadController.prototype, "remove", null);
 exports.LeadController = LeadController = __decorate([
     (0, common_1.Controller)("leads"),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __metadata("design:paramtypes", [lead_service_1.LeadService])
 ], LeadController);
 //# sourceMappingURL=lead.controller.js.map

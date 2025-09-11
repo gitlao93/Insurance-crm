@@ -13,6 +13,7 @@ export declare class Lead {
     email: string;
     phoneNumber: string;
     status: LeadStatus;
+    note?: string;
     agentId: number;
     agent: User;
     policyPlanId: number;

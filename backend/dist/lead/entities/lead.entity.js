@@ -48,6 +48,10 @@ __decorate([
     __metadata("design:type", String)
 ], Lead.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
+    __metadata("design:type", String)
+], Lead.prototype, "note", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Lead.prototype, "agentId", void 0);

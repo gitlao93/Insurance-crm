@@ -12,11 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateLeadDto = void 0;
 const class_validator_1 = require("class-validator");
 const lead_entity_1 = require("../entities/lead.entity");
-const class_transformer_1 = require("class-transformer");
 class CreateLeadDto {
-    constructor() {
-        this.status = lead_entity_1.LeadStatus.NEW;
-    }
 }
 exports.CreateLeadDto = CreateLeadDto;
 __decorate([
@@ -30,29 +26,30 @@ __decorate([
     __metadata("design:type", String)
 ], CreateLeadDto.prototype, "lastName", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateLeadDto.prototype, "email", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateLeadDto.prototype, "phoneNumber", void 0);
 __decorate([
     (0, class_validator_1.IsEnum)(lead_entity_1.LeadStatus),
-    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateLeadDto.prototype, "status", void 0);
 __decorate([
-    (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateLeadDto.prototype, "note", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
 ], CreateLeadDto.prototype, "agentId", void 0);
 __decorate([
-    (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
 ], CreateLeadDto.prototype, "policyPlanId", void 0);
 //# sourceMappingURL=create-lead.dto.js.map
