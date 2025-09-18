@@ -9,6 +9,11 @@ import { DashboardModule } from "./dashboard/dashboard.module";
 import { User } from "./users/entities/user.entity";
 import { Agency } from "./agencies/entities/agency.entity";
 import { SeederModule } from "./database/seeder.module";
+import { PolicyCategory } from "./policies/entities/policy-category.entity";
+import { PolicyPlan } from "./policies/entities/policy-plan.entity";
+import { PoliciesModule } from "./policies/policy.module";
+import { LeadModule } from "./lead/lead.module";
+import { Lead } from "./lead/entities/lead.entity";
 
 @Module({
   imports: [
@@ -18,8 +23,8 @@ import { SeederModule } from "./database/seeder.module";
       port: 3306,
       username: "root",
       database: "goodlife_insurance_db",
-      entities: [User, Agency],
-      synchronize: true, // set false in production
+      entities: [User, Agency, PolicyCategory, PolicyPlan, Lead],
+      synchronize: true, // ⚠️ disable in prod
       logging: true,
     }),
     PassportModule,
@@ -32,6 +37,8 @@ import { SeederModule } from "./database/seeder.module";
     AgenciesModule,
     DashboardModule,
     SeederModule,
+    PoliciesModule,
+    LeadModule, // 👈 provides LeadService
   ],
 })
 export class AppModule {}

@@ -19,21 +19,31 @@ const bcrypt = require("bcrypt");
 const agency_entity_1 = require("../agencies/entities/agency.entity");
 const user_entity_1 = require("../users/entities/user.entity");
 const typeorm_2 = require("@nestjs/typeorm");
+const policy_category_entity_1 = require("../policies/entities/policy-category.entity");
+const policy_plan_entity_1 = require("../policies/entities/policy-plan.entity");
 let SeederService = class SeederService {
-    constructor(agencyRepository, userRepository) {
+    constructor(agencyRepository, userRepository, categoryRepository, planRepository) {
         this.agencyRepository = agencyRepository;
         this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.planRepository = planRepository;
     }
     async seed() {
         console.log("🌱 Starting database seeding...");
         await this.userRepository.createQueryBuilder().delete().execute();
         await this.agencyRepository.createQueryBuilder().delete().execute();
+        await this.planRepository.createQueryBuilder().delete().execute();
+        await this.categoryRepository.createQueryBuilder().delete().execute();
         await this.userRepository.query("ALTER TABLE users AUTO_INCREMENT = 1");
         await this.agencyRepository.query("ALTER TABLE agencies AUTO_INCREMENT = 1");
+        await this.categoryRepository.query("ALTER TABLE policy_categories AUTO_INCREMENT = 1");
+        await this.planRepository.query("ALTER TABLE policy_plans AUTO_INCREMENT = 1");
         const agencies = await this.createAgencies();
         console.log(`✅ Created ${agencies.length} agencies`);
         const users = await this.createUsers(agencies);
         console.log(`✅ Created ${users.length} users`);
+        const { categories, plans } = await this.createPolicies();
+        console.log(`✅ Created ${categories.length} categories and ${plans.length} plans`);
         console.log("🎉 Database seeding completed successfully!");
     }
     async createAgencies() {
@@ -117,13 +127,88 @@ let SeederService = class SeederService {
         }
         return users;
     }
+    async createPolicies() {
+        const categoriesData = [
+            { categoryName: "Individual", description: "Individual coverage plans" },
+            { categoryName: "Family", description: "Family (4-in-1) coverage plans" },
+            {
+                categoryName: "Senior",
+                description: "Special senior citizen benefits",
+            },
+        ];
+        const categories = await this.categoryRepository.save(this.categoryRepository.create(categoriesData));
+        const plansData = [
+            {
+                planName: "Topaz",
+                monthlyRate: 425,
+                currency: "PHP",
+                coverageAmount: 50000,
+                status: "active",
+                categoryId: categories[0].id,
+            },
+            {
+                planName: "Ruby",
+                monthlyRate: 480,
+                currency: "PHP",
+                coverageAmount: 75000,
+                status: "active",
+                categoryId: categories[1].id,
+            },
+            {
+                planName: "Emerald",
+                monthlyRate: 650,
+                currency: "PHP",
+                coverageAmount: 100000,
+                status: "active",
+                categoryId: categories[1].id,
+            },
+            {
+                planName: "Amber",
+                monthlyRate: 720,
+                currency: "PHP",
+                coverageAmount: 150000,
+                status: "active",
+                categoryId: categories[1].id,
+            },
+            {
+                planName: "Opal",
+                monthlyRate: 900,
+                currency: "PHP",
+                coverageAmount: 200000,
+                status: "active",
+                categoryId: categories[1].id,
+            },
+            {
+                planName: "Sapphire",
+                monthlyRate: 550,
+                currency: "PHP",
+                coverageAmount: 80000,
+                status: "active",
+                categoryId: categories[0].id,
+            },
+            {
+                planName: "Senior Citizen Plan",
+                monthlyRate: 600,
+                currency: "PHP",
+                coverageAmount: 100000,
+                status: "active",
+                categoryId: categories[2].id,
+            },
+        ];
+        const plans = await this.planRepository.save(this.planRepository.create(plansData));
+        return { categories, plans };
+    }
 };
 exports.SeederService = SeederService;
 exports.SeederService = SeederService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_2.InjectRepository)(agency_entity_1.Agency)),
     __param(1, (0, typeorm_2.InjectRepository)(user_entity_1.User)),
+    __param(2, (0, typeorm_2.InjectRepository)(policy_category_entity_1.PolicyCategory)),
+    __param(3, (0, typeorm_2.InjectRepository)(policy_plan_entity_1.PolicyPlan)),
     __metadata("design:paramtypes", [typeorm_1.Repository,
+        typeorm_1.Repository,
+        typeorm_1.Repository,
         typeorm_1.Repository])
 ], SeederService);
 //# sourceMappingURL=seeder.service.js.map

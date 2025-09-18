@@ -12,12 +12,16 @@ const typeorm_1 = require("@nestjs/typeorm");
 const seeder_service_1 = require("./seeder.service");
 const agency_entity_1 = require("../agencies/entities/agency.entity");
 const user_entity_1 = require("../users/entities/user.entity");
+const policy_category_entity_1 = require("../policies/entities/policy-category.entity");
+const policy_plan_entity_1 = require("../policies/entities/policy-plan.entity");
 let SeederModule = class SeederModule {
 };
 exports.SeederModule = SeederModule;
 exports.SeederModule = SeederModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([agency_entity_1.Agency, user_entity_1.User])],
+        imports: [
+            typeorm_1.TypeOrmModule.forFeature([agency_entity_1.Agency, user_entity_1.User, policy_category_entity_1.PolicyCategory, policy_plan_entity_1.PolicyPlan]),
+        ],
         providers: [seeder_service_1.SeederService],
         exports: [seeder_service_1.SeederService],
     })

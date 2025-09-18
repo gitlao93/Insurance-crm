@@ -4,7 +4,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./components/Dashboard";
 import Overview from "./pages/Overview";
-import Client from "./pages/Client";
+import Lead from "./pages/Lead";
 import PolicyHolder from "./pages/PolicyHolder";
 import User from "./pages/User";
 import Collection from "./pages/Collection";
@@ -39,10 +39,10 @@ function App() {
             }
           />
           <Route
-            path="client"
+            path="lead"
             element={
               <ProtectedRoute roles={["admin", "agent"]}>
-                <Client />
+                <Lead />
               </ProtectedRoute>
             }
           />
