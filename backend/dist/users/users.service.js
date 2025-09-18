@@ -72,11 +72,17 @@ let UsersService = class UsersService {
         if (!user) {
             throw new common_1.NotFoundException(`User with ID ${id} not found`);
         }
-        if (updateUserDto.password) {
+        if (updateUserDto.password && updateUserDto.password.trim() !== "") {
             const saltRounds = 10;
-            updateUserDto.password = await bcrypt.hash(updateUserDto.password, saltRounds);
+            user.password = await bcrypt.hash(updateUserDto.password, saltRounds);
         }
-        Object.assign(user, updateUserDto);
+        for (const [key, value] of Object.entries(updateUserDto)) {
+            if (key === "password")
+                continue;
+            if (value !== undefined) {
+                user[key] = value;
+            }
+        }
         return await this.userRepository.save(user);
     }
     async deactivate(id) {

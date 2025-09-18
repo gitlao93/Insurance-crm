@@ -77,26 +77,26 @@ export class UsersService {
       relations: ["agency"],
     });
   }
-
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // Handle password hashing only if a new password is provided
-    if (updateUserDto.password) {
+    // Only update password if provided and not empty
+    if (updateUserDto.password && updateUserDto.password.trim() !== "") {
       const saltRounds = 10;
-      updateUserDto.password = await bcrypt.hash(
-        updateUserDto.password,
-        saltRounds
-      );
+      user.password = await bcrypt.hash(updateUserDto.password, saltRounds);
     }
 
-    // Merge changes into the entity
-    Object.assign(user, updateUserDto);
+    // Merge everything except password
+    for (const [key, value] of Object.entries(updateUserDto)) {
+      if (key === "password") continue; // skip password
+      if (value !== undefined) {
+        (user as any)[key] = value;
+      }
+    }
 
-    // Save updated entity (this runs validations, subscribers, hooks, etc.)
     return await this.userRepository.save(user);
   }
 
