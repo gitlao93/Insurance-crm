@@ -2,7 +2,8 @@ import { Agency } from "../../agencies/entities/agency.entity";
 export declare enum UserRole {
     ADMIN = "admin",
     AGENT = "agent",
-    COLLECTION_SUPERVISOR = "collection_supervisor"
+    COLLECTION_SUPERVISOR = "collection_supervisor",
+    SUPER_ADMIN = "super_admin"
 }
 export declare class User {
     id: number;
@@ -17,4 +18,7 @@ export declare class User {
     isActive: boolean;
     agency: Agency;
     agencyId: number;
+    supervisor: User | null;
+    supervisorId: number | null;
+    subordinates: User[];
 }

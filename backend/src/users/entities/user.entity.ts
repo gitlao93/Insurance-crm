@@ -1,57 +1,73 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm"
-import { Agency } from "../../agencies/entities/agency.entity"
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from "typeorm";
+import { Agency } from "../../agencies/entities/agency.entity";
 
 export enum UserRole {
   ADMIN = "admin",
   AGENT = "agent",
   COLLECTION_SUPERVISOR = "collection_supervisor",
+  SUPER_ADMIN = "super_admin",
 }
 
 @Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column({ type: "varchar", length: 100 })
-  firstName: string
+  firstName: string;
 
   @Column({ type: "varchar", length: 100 })
-  lastName: string
+  lastName: string;
 
   @Column({ type: "varchar", length: 255, unique: true })
-  email: string
+  email: string;
 
   @Column({ type: "varchar", length: 255 })
-  password: string
+  password: string;
 
   @Column({ type: "varchar", length: 20 })
-  phoneNumber: string
+  phoneNumber: string;
 
   @Column({ type: "varchar", length: 20, nullable: true })
-  landlineNumber: string | null
+  landlineNumber: string | null;
 
   @Column({ type: "varchar", length: 255, nullable: true })
-  officeHours: string | null
+  officeHours: string | null;
 
   @Column({
     type: "enum",
     enum: UserRole,
     default: UserRole.AGENT,
   })
-  role: UserRole
+  role: UserRole;
 
   @Column({ type: "boolean", default: true })
-  isActive: boolean
+  isActive: boolean;
 
   // Relations
-  @ManyToOne(
-    () => Agency,
-    (agency) => agency.users,
-    { eager: true },
-  )
+  @ManyToOne(() => Agency, (agency) => agency.users, { eager: true })
   @JoinColumn({ name: "agency_id" })
-  agency: Agency
+  agency: Agency;
 
   @Column({ name: "agency_id" })
-  agencyId: number
+  agencyId: number;
+
+  // Self-referencing relation: supervisor
+  @ManyToOne(() => User, (user) => user.subordinates, { nullable: true })
+  @JoinColumn({ name: "supervisor_id" })
+  supervisor: User | null;
+
+  @Column({ name: "supervisor_id", nullable: true })
+  supervisorId: number | null;
+
+  // Reverse side: all users supervised by this user
+  @OneToMany(() => User, (user) => user.supervisor)
+  subordinates: User[];
 }

@@ -23,144 +23,52 @@ let DashboardService = class DashboardService {
         this.userRepository = userRepository;
         this.agencyRepository = agencyRepository;
     }
-    async getDashboardStats(user) {
-        let totalClients = 0;
-        let activePolicies = 0;
-        let pendingCollections = 0;
-        let monthlyRevenue = 0;
-        switch (user.role) {
-            case user_entity_1.UserRole.ADMIN:
-                totalClients = 156;
-                activePolicies = 342;
-                pendingCollections = 8;
-                monthlyRevenue = 45600;
-                break;
-            case user_entity_1.UserRole.AGENT:
-                totalClients = 24;
-                activePolicies = 45;
-                pendingCollections = 0;
-                monthlyRevenue = 8450;
-                break;
-            case user_entity_1.UserRole.COLLECTION_SUPERVISOR:
-                totalClients = 89;
-                activePolicies = 178;
-                pendingCollections = 23;
-                monthlyRevenue = 23400;
-                break;
-        }
+    async getUserStats(agencyId) {
+        const whereClause = agencyId ? { agencyId } : {};
+        const totalUsers = await this.userRepository.count({ where: whereClause });
+        const collectionSupervisors = await this.userRepository.count({
+            where: { ...whereClause, role: user_entity_1.UserRole.COLLECTION_SUPERVISOR },
+        });
+        const agents = await this.userRepository.count({
+            where: { ...whereClause, role: user_entity_1.UserRole.AGENT },
+        });
+        const admins = await this.userRepository.count({
+            where: { ...whereClause, role: user_entity_1.UserRole.ADMIN },
+        });
         return {
-            totalClients,
-            activePolicies,
-            pendingCollections,
-            monthlyRevenue,
-            recentActivities: [
-                {
-                    id: 1,
-                    type: "Client",
-                    description: "New client registration completed",
-                    timestamp: "2 hours ago",
-                    status: "success",
-                },
-                {
-                    id: 2,
-                    type: "Policy",
-                    description: "Policy renewal pending approval",
-                    timestamp: "4 hours ago",
-                    status: "warning",
-                },
-                {
-                    id: 3,
-                    type: "Collection",
-                    description: "Payment overdue - follow up required",
-                    timestamp: "1 day ago",
-                    status: "error",
-                },
-            ],
+            totalUsers,
+            collectionSupervisors,
+            agents,
+            admins,
         };
     }
-    async getClients(user) {
-        const allClients = [
-            {
-                id: 1,
-                firstName: "John",
-                lastName: "Doe",
-                email: "john.doe@email.com",
-                phone: "(555) 123-4567",
-                status: "active",
-                assignedAgent: "Agent Smith",
-                totalPolicies: 3,
-                lastContact: "2024-01-15",
-                agencyId: user.agencyId,
-            },
-            {
-                id: 2,
-                firstName: "Jane",
-                lastName: "Smith",
-                email: "jane.smith@email.com",
-                phone: "(555) 987-6543",
-                status: "pending",
-                assignedAgent: `${user.firstName} ${user.lastName}`,
-                totalPolicies: 1,
-                lastContact: "2024-01-10",
-                agencyId: user.agencyId,
-            },
-        ];
-        if (user.role === user_entity_1.UserRole.AGENT) {
-            return allClients.filter((client) => client.assignedAgent === `${user.firstName} ${user.lastName}`);
+    async getSupervisorsWithAgents(agencyId, user) {
+        let supervisors;
+        if (user?.role === user_entity_1.UserRole.COLLECTION_SUPERVISOR) {
+            supervisors = await this.userRepository.find({
+                where: { id: user.id, isActive: true },
+                relations: ["subordinates"],
+            });
         }
-        return allClients;
-    }
-    async getPolicyHolders(user) {
-        const allPolicies = [
-            {
-                id: 1,
-                policyNumber: "POL-2024-001",
-                holderName: "John Doe",
-                policyType: "Life Insurance",
-                premium: 1200,
-                status: "active",
-                startDate: "2024-01-01",
-                endDate: "2024-12-31",
-                assignedAgent: "Agent Smith",
-                agencyId: user.agencyId,
-            },
-            {
-                id: 2,
-                policyNumber: "POL-2024-002",
-                holderName: "Jane Smith",
-                policyType: "Auto Insurance",
-                premium: 800,
-                status: "pending",
-                startDate: "2024-02-01",
-                endDate: "2025-01-31",
-                assignedAgent: `${user.firstName} ${user.lastName}`,
-                agencyId: user.agencyId,
-            },
-        ];
-        if (user.role === user_entity_1.UserRole.AGENT) {
-            return allPolicies.filter((policy) => policy.assignedAgent === `${user.firstName} ${user.lastName}`);
+        else {
+            supervisors = await this.userRepository.find({
+                where: {
+                    agencyId,
+                    role: user_entity_1.UserRole.COLLECTION_SUPERVISOR,
+                    isActive: true,
+                },
+                relations: ["subordinates"],
+            });
         }
-        return allPolicies;
-    }
-    async getCollections(user) {
-        if (user.role === user_entity_1.UserRole.AGENT) {
-            throw new common_1.ForbiddenException("Agents cannot access collection data");
-        }
-        return [
-            {
-                id: 1,
-                policyNumber: "POL-2024-001",
-                clientName: "John Doe",
-                amountDue: 1200,
-                dueDate: "2024-01-15",
-                daysOverdue: 10,
-                status: "overdue",
-                lastContact: "2024-01-20",
-                assignedAgent: "Agent Smith",
-                notes: "Client requested payment extension",
-                agencyId: user.agencyId,
-            },
-        ];
+        return supervisors.map((sup) => ({
+            id: sup.id,
+            name: `${sup.firstName} ${sup.lastName}`,
+            agentCount: sup.subordinates.length,
+            agents: sup.subordinates.map((agent) => ({
+                id: agent.id,
+                name: `${agent.firstName} ${agent.lastName}`,
+            })),
+        }));
     }
 };
 exports.DashboardService = DashboardService;

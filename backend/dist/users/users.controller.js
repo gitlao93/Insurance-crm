@@ -27,8 +27,9 @@ let UsersController = class UsersController {
     async create(createUserDto) {
         return this.usersService.create(createUserDto);
     }
-    async findAll() {
-        return this.usersService.findAll(1);
+    async findAll(agencyId) {
+        const agencyIdNumber = agencyId ? +agencyId : undefined;
+        return this.usersService.findAll(agencyIdNumber);
     }
     async findOne(id) {
         const userId = +id;
@@ -37,6 +38,14 @@ let UsersController = class UsersController {
     async update(id, updateUserDto) {
         const userId = +id;
         return this.usersService.update(userId, updateUserDto);
+    }
+    async deactivate(id) {
+        const userId = +id;
+        return this.usersService.deactivate(userId);
+    }
+    async activate(id) {
+        const userId = +id;
+        return this.usersService.activate(userId);
     }
     async remove(id) {
         const userId = +id;
@@ -54,13 +63,15 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, roles_decorator_1.Roles)("admin", "collection_supervisor"),
+    __param(0, (0, common_1.Query)("agencyId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(":id"),
     (0, roles_decorator_1.Roles)("admin", "agent", "collection_supervisor"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
@@ -68,13 +79,32 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(":id"),
     (0, roles_decorator_1.Roles)("admin"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
+    (0, common_1.Patch)(":id/deactivate"),
+    (0, roles_decorator_1.Roles)("admin"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "deactivate", null);
+__decorate([
+    (0, common_1.Patch)(":id/activate"),
+    (0, roles_decorator_1.Roles)("admin"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "activate", null);
+__decorate([
     (0, common_1.Delete)(":id"),
     (0, roles_decorator_1.Roles)("admin"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

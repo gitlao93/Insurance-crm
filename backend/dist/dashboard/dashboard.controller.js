@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DashboardController = void 0;
 const common_1 = require("@nestjs/common");
@@ -16,105 +19,39 @@ const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const user_entity_1 = require("../users/entities/user.entity");
-const agency_entity_1 = require("../agencies/entities/agency.entity");
+const get_user_decorator_1 = require("../auth/decorators/get-user.decorator");
 let DashboardController = class DashboardController {
     constructor(dashboardService) {
         this.dashboardService = dashboardService;
     }
-    async getDashboardStats() {
-        return this.dashboardService.getDashboardStats({
-            id: 1,
-            role: user_entity_1.UserRole.ADMIN,
-            agencyId: 1,
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            phoneNumber: "",
-            landlineNumber: "",
-            officeHours: "",
-            isActive: false,
-            agency: new agency_entity_1.Agency(),
-        });
+    async getUserStats(req, agencyId) {
+        const id = agencyId ? Number(agencyId) : req.user.agencyId;
+        return this.dashboardService.getUserStats(id);
     }
-    async getClients() {
-        return this.dashboardService.getClients({
-            id: 1,
-            role: user_entity_1.UserRole.ADMIN,
-            agencyId: 1,
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            phoneNumber: "",
-            landlineNumber: "",
-            officeHours: "",
-            isActive: false,
-            agency: new agency_entity_1.Agency(),
-        });
-    }
-    async getPolicyHolders() {
-        return this.dashboardService.getPolicyHolders({
-            id: 1,
-            role: user_entity_1.UserRole.ADMIN,
-            agencyId: 1,
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            phoneNumber: "",
-            landlineNumber: "",
-            officeHours: "",
-            isActive: false,
-            agency: new agency_entity_1.Agency(),
-        });
-    }
-    async getCollections() {
-        return this.dashboardService.getCollections({
-            id: 1,
-            role: user_entity_1.UserRole.ADMIN,
-            agencyId: 1,
-            firstName: "",
-            lastName: "",
-            email: "",
-            password: "",
-            phoneNumber: "",
-            landlineNumber: "",
-            officeHours: "",
-            isActive: false,
-            agency: new agency_entity_1.Agency(),
-        });
+    async getSupervisors(user, agencyId) {
+        const targetAgencyId = agencyId || user.agencyId;
+        return this.dashboardService.getSupervisorsWithAgents(targetAgencyId, user);
     }
 };
 exports.DashboardController = DashboardController;
 __decorate([
-    (0, common_1.Get)("stats"),
-    (0, roles_decorator_1.Roles)("admin", "agent", "collection_supervisor"),
+    (0, common_1.Get)("user-stats"),
+    (0, roles_decorator_1.Roles)("admin"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)("agencyId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
-], DashboardController.prototype, "getDashboardStats", null);
+], DashboardController.prototype, "getUserStats", null);
 __decorate([
-    (0, common_1.Get)("clients"),
-    (0, roles_decorator_1.Roles)("admin", "agent"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], DashboardController.prototype, "getClients", null);
-__decorate([
-    (0, common_1.Get)("policy-holders"),
-    (0, roles_decorator_1.Roles)("admin", "agent", "collection_supervisor"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], DashboardController.prototype, "getPolicyHolders", null);
-__decorate([
-    (0, common_1.Get)("collections"),
+    (0, common_1.Get)("supervisors"),
     (0, roles_decorator_1.Roles)("admin", "collection_supervisor"),
+    __param(0, (0, get_user_decorator_1.GetUser)()),
+    __param(1, (0, common_1.Query)("agencyId")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [user_entity_1.User, Number]),
     __metadata("design:returntype", Promise)
-], DashboardController.prototype, "getCollections", null);
+], DashboardController.prototype, "getSupervisors", null);
 exports.DashboardController = DashboardController = __decorate([
     (0, common_1.Controller)("dashboard"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

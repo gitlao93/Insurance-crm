@@ -11,5 +11,7 @@ export declare class UsersService {
     findByEmail(email: string): Promise<User>;
     findByRole(role: UserRole, agencyId?: number): Promise<User[]>;
     update(id: number, updateUserDto: UpdateUserDto): Promise<User>;
+    deactivate(id: number): Promise<User>;
+    activate(id: number): Promise<User>;
     remove(id: number): Promise<void>;
 }

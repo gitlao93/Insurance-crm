@@ -8,13 +8,13 @@ export interface User {
   phoneNumber: string;
   landlineNumber?: string;
   officeHours?: string;
-  role: "admin" | "agent" | "collection_supervisor";
-  agency: {
+  role?: "admin" | "agent" | "collection_supervisor";
+  agency?: {
     id: number;
     agencyName: string;
   };
-  isActive: boolean;
-  createdAt: string;
+  isActive?: boolean;
+  createdAt?: string;
 }
 
 export interface CreateUserRequest {
@@ -56,5 +56,15 @@ export const userService = {
 
   async deleteUser(id: number): Promise<void> {
     await api.delete(`/users/${id}`);
+  },
+
+  async deactivateUser(id: number): Promise<User> {
+    const response = await api.patch(`/users/${id}/deactivate`);
+    return response.data;
+  },
+
+  async activateUser(id: number): Promise<User> {
+    const response = await api.patch(`/users/${id}/activate`);
+    return response.data;
   },
 };
