@@ -21,7 +21,7 @@ export interface CreateUserRequest {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   phoneNumber: string;
   landlineNumber?: string;
   officeHours?: string;
